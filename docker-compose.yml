@@ -1,0 +1,9 @@
+version: "3.7"
+services:
+    wiki:
+        image: wiki:${TAG:-latest}
+        build: .
+        container_name: wiki
+        hostname: wiki
+        ports:
+            - 8080:8080
