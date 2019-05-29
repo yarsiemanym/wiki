@@ -1,5 +1,13 @@
-<h1>{{.Title}}</h1>
+<html>
+    <head>
+        <link rel="stylesheet" href="/content/wiki.css" />
+        <script type="text/javascript" src="/scripts/wiki.js"></script>
+    </head>
+    <body>
+        <h1>{{.Title}}</h1>
 
-<p>[<a href="/edit/{{.Title}}">edit</a>]</p>
+        <p>[<a href="/edit/{{.Title}}">edit</a>]</p>
 
-<div>{{printf "%s" .Body}}</div>
+        <div>{{printf "%s" .Body}}</div>
+    </body>
+</html>
