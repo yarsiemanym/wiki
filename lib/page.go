@@ -1,4 +1,4 @@
-package main
+package lib
 
 import "io/ioutil"
 
@@ -7,7 +7,7 @@ type Page struct {
 	Body  []byte
 }
 
-func (p *Page) save() error {
+func (p *Page) savePage() error {
 	filename := "data/" + p.Title + ".txt"
 	return ioutil.WriteFile(filename, p.Body, 0600)
 }

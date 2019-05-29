@@ -2,20 +2,17 @@ FROM golang:alpine AS build
 WORKDIR /go/src/github.com/yarsiemanym/wiki/
 
 ADD ./*.go ./
+ADD ./lib ./lib
 ADD ./templates ./templates
 
-# 0.    Set some shell flags like `-e` to abort the 
+# 1.    Set some shell flags like `-e` to abort the 
 #       execution in case of any failure (useful if we 
 #       have many ';' commands) and also `-x` to print to 
 #       stderr each command already expanded.
-# 1.    Get into the directory with the golang source code
 # 2.    Perform the go build with some flags to make our
 #       build produce a static binary (CGO_ENABLED=0 and 
 #       the `netgo` tag).
-# 3.    copy the final binary to a suitable location that
-#       is easy to reference in the next stage
-RUN set -ex && \     
-  CGO_ENABLED=0 go build -tags netgo -v -a -ldflags '-extldflags "-static"'
+RUN set -ex && CGO_ENABLED=0 go build -tags netgo -v -a -ldflags '-extldflags "-static"'
 
 FROM scratch
 WORKDIR /

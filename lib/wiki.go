@@ -1,4 +1,4 @@
-package main
+package lib
 
 import (
 	"net/http"
@@ -6,7 +6,7 @@ import (
 	"text/template"
 )
 
-func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
+func View(w http.ResponseWriter, r *http.Request, title string) {
 	p, err := loadPage(title)
 	if err != nil {
 		http.Redirect(w, r, "/edit/"+title, http.StatusFound)
@@ -16,7 +16,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
 	renderTemplate(w, "view", p)
 }
 
-func editHandler(w http.ResponseWriter, r *http.Request, title string) {
+func Edit(w http.ResponseWriter, r *http.Request, title string) {
 	p, err := loadPage(title)
 	if err != nil {
 		p = &Page{Title: title}
@@ -24,10 +24,10 @@ func editHandler(w http.ResponseWriter, r *http.Request, title string) {
 	renderTemplate(w, "edit", p)
 }
 
-func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
+func Save(w http.ResponseWriter, r *http.Request, title string) {
 	body := r.FormValue("body")
 	p := &Page{Title: title, Body: []byte(body)}
-	err := p.save()
+	err := p.savePage()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -35,23 +35,11 @@ func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
 	http.Redirect(w, r, "/view/"+title, http.StatusFound)
 }
 
-func frontPageHandler(w http.ResponseWriter, r *http.Request) {
+func FrontPage(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/view/frontpage", http.StatusFound)
 }
 
-func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
-	err := templates.ExecuteTemplate(w, tmpl+".html", p)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-}
-
-func linkPages(body []byte) []byte {
-	r := regexp.MustCompile(`\[(\w+)\]`)
-	return r.ReplaceAll(body, []byte("<a href='/view/$1'>$1</a>"))
-}
-
-func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
+func MakeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		m := validPath.FindStringSubmatch(r.URL.Path)
 		if m == nil {
@@ -60,6 +48,18 @@ func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.Handl
 		}
 		fn(w, r, m[2])
 	}
+}
+
+func renderTemplate(w http.ResponseWriter, template string, p *Page) {
+	err := templates.ExecuteTemplate(w, template+".html", p)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func linkPages(body []byte) []byte {
+	r := regexp.MustCompile(`\[(\w+)\]`)
+	return r.ReplaceAll(body, []byte("<a href='/view/$1'>$1</a>"))
 }
 
 var templates = template.Must(template.ParseFiles("templates/edit.html", "templates/view.html"))
